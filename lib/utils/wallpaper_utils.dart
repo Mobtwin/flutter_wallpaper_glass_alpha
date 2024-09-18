@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:wallpaper_handler/wallpaper_handler.dart';
 
 Future<void> saveImage(String image, BuildContext context) async {
-  print(image);
   ByteData byteData = await rootBundle.load(image);
   Uint8List imageData = byteData.buffer.asUint8List();
-  final result = await ImageGallerySaver.saveImage(imageData);
+  final result = await ImageGallerySaverPlus.saveImage(imageData);
   if (result != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
