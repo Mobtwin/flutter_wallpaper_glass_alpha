@@ -1,15 +1,13 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:wallpaper_handler/wallpaper_handler.dart';
 
 Future<void> saveImage(String image, BuildContext context) async {
+  print(image);
   ByteData byteData = await rootBundle.load(image);
   Uint8List imageData = byteData.buffer.asUint8List();
   final result = await ImageGallerySaver.saveImage(imageData);
@@ -59,28 +57,20 @@ SnackBar getResultSnackBar(ShareResult result) {
 }
 
 Future<void> setWallpaper(
-    BuildContext context, String image, int location) async {
+    BuildContext context, String image, WallpaperLocation location) async {
   try {
-    // Load the image from assets
-    final ByteData assetImage = await rootBundle.load(image);
-
-    // Get the temporary directory to store the file
-    final Directory tempDir = await getTemporaryDirectory();
-
-    // Create a new file in the temporary directory
-    final File file = File('${tempDir.path}/wallpaper.jpg');
-
-    // Write the asset image bytes to the file
-    await file.writeAsBytes(assetImage.buffer.asUint8List());
-
-    final bool result =
-        await WallpaperManager.setWallpaperFromFile(file.path, location);
+    // Set the wallpaper
+    bool result =
+        await WallpaperHandler.instance.setWallpaperFromAsset(image, location);
 
     // Show a snackbar with the result
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          result ? 'Wallpaper set successfully' : 'Failed to set wallpaper',
+          result == true
+              ? 'Wallpaper set successfully'
+              : 'Failed to set wallpaper',
+          style: GoogleFonts.abel(fontSize: 16, color: Colors.white),
         ),
       ),
     );

@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
+import 'package:wallpaper_handler/wallpaper_handler.dart';
+// import 'package:flutter_wallpaper_manager/flutter_wallpaper_manager.dart';
+// import 'package:wallpaper_manager_plus/wallpaper_manager_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wallpapers/model_view/data_provider.dart';
@@ -214,8 +216,8 @@ class _FullScreenState extends State<FullScreen> {
                                                   setWallpaper(
                                                           context,
                                                           widget.image,
-                                                          WallpaperManager
-                                                              .HOME_SCREEN)
+                                                          WallpaperLocation
+                                                              .homeScreen)
                                                       .whenComplete(() {
                                                     Navigator.pop(context);
                                                   });
@@ -228,8 +230,8 @@ class _FullScreenState extends State<FullScreen> {
                                                   setWallpaper(
                                                           context,
                                                           widget.image,
-                                                          WallpaperManager
-                                                              .LOCK_SCREEN)
+                                                          WallpaperLocation
+                                                              .lockScreen)
                                                       .whenComplete(() {
                                                     Navigator.pop(context);
                                                   });
@@ -241,8 +243,8 @@ class _FullScreenState extends State<FullScreen> {
                                                   setWallpaper(
                                                           context,
                                                           widget.image,
-                                                          WallpaperManager
-                                                              .BOTH_SCREEN)
+                                                          WallpaperLocation
+                                                              .bothScreens)
                                                       .whenComplete(() {
                                                     Navigator.pop(context);
                                                   });
