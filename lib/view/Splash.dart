@@ -114,8 +114,8 @@ class _SplashScreenState extends State<SplashScreen> {
                     ),
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(32),
-                        bottomRight: Radius.circular(32),
+                        // bottomLeft: Radius.circular(32),
+                        // bottomRight: Radius.circular(32),
                       ),
                     ),
                   ),
