@@ -174,11 +174,11 @@ jobs:
     
   transfer_to_server:
     needs: build-ios
-     runs-on: ubuntu-latest
-     steps:
-       - name: Download Artifact
-         uses: actions/download-artifact@v3
-         with:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
           name: Runner.app
           path: Runner.app
       - name: Transfer ipa to server
