@@ -143,49 +143,49 @@ jobs:
         fi
       shell: bash
 
-  # build-ios:
-  #   name: Build iOS
-  #   runs-on: macos-latest
+  build-ios:
+    name: Build iOS
+    runs-on: macos-latest
 
-  #   steps:
-  #   - name: Checkout code
-  #     uses: actions/checkout@v3
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-  #   - name: Set up Flutter
-  #     uses: subosito/flutter-action@v2
-  #     with:
-  #       channel: stable
-  #       flutter-version: '3.24.2'
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        flutter-version: '3.24.2'
 
-  #   - name: Install dependencies
-  #     run: flutter pub get
+    - name: Install dependencies
+      run: flutter pub get
 
-  #   - name: Build iOS App
-  #     run: flutter build ios --release --no-codesign
-  #   - name: Move generated files to root dir ios
-  #     run: |
-  #       mv build/ios/iphoneos/Runner.app ./
-  #   - name: Upload Artifact
-  #     uses: actions/upload-artifact@v3
-  #     with:
-  #       name: Runner.app
-  #       path: Runner.app
+    - name: Build iOS App
+      run: flutter build ios --release --no-codesign
+    - name: Move generated files to root dir ios
+      run: |
+        mv build/ios/iphoneos/Runner.app ./
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Runner.app
+        path: Runner.app
     
-  # transfer_to_server:
-  #   needs: build-ios
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Download Artifact
-  #       uses: actions/download-artifact@v3
-  #       with:
-  #         name: Runner.app
-  #         path: Runner.app
-  #     - name: Transfer ipa to server
-  #       uses: appleboy/scp-action@master
-  #       with:
-  #         host: ${{ secrets.SERVER_HOST }}
-  #         username: ${{ secrets.SERVER_USER }}
-  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
-  #         port: 22
-  #         source: "Runner.app"
-  #         target: "/root/ios"
+  transfer_to_server:
+    needs: build-ios
+     runs-on: ubuntu-latest
+     steps:
+       - name: Download Artifact
+         uses: actions/download-artifact@v3
+         with:
+          name: Runner.app
+          path: Runner.app
+      - name: Transfer ipa to server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "Runner.app"
+          target: "/root/ios"
