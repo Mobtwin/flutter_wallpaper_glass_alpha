@@ -3,6 +3,7 @@ name: Build Flutter App
 on:
   repository_dispatch:
     types: [dispatch-android]
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
 
