@@ -26,19 +26,40 @@ jobs:
 
     - name: Install dependencies
       run: flutter pub get
-
-    - name: Build iOS App
-      run: flutter build ios --debug --no-codesign
-    - name: ls build
-      run: zip -r ios_build.zip build/ios/
-    - name: Move generated files to root dir ios
+    - name: Set up Provisioning Profile
       run: |
-        mv build/ios/iphoneos/Runner.app ./
-    - name: Upload Artifact
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        echo "${{ secrets.PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/TESTID.mobileprovision
+    # 5. Set up Xcode for Archive
+    - name: Set up Xcode
+      run: |
+        cd ios
+        xcodebuild archive \
+          -workspace Runner.xcworkspace \
+          -scheme Runner \
+          -archivePath ./build/Runner.xcarchive \
+          CODE_SIGN_STYLE=Manual \
+          DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }} \
+          PROVISIONING_PROFILE_SPECIFIER=${{ secrets.PROVISIONING_PROFILE }}
+      env:
+        FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
+
+    # 6. Export the .ipa
+    - name: Export IPA
+      run: |
+        xcodebuild -exportArchive \
+          -archivePath ./ios/build/Runner.xcarchive \
+          -exportPath ./ios/build/ipa \
+          -exportOptionsPlist ./ios/exportOptions.plist
+      env:
+        FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
+
+    # 7. Upload .ipa as an artifact
+    - name: Upload IPA Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: ios_build.zip
-        path: ios_build.zip
+        name: ios-ipa
+        path: ios/build/ipa/Runner.ipa
     
   transfer_to_server:
     needs: build-ios
@@ -47,8 +68,8 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
-          name: ios_build.zip
-          path: ios_build.zip
+          name: ios-ipa
+          path: ios-ipa
       - name: Transfer ipa to server
         uses: appleboy/scp-action@master
         with:
@@ -56,5 +77,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
-          source: "ios_build.zip"
+          source: "ios-ipa"
           target: "/root/ios"
