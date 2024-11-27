@@ -61,7 +61,10 @@ jobs:
 
       - name: Rename package app name
         run: dart run change_app_package_name:main com.chrip.newreads
-
+      - name: cocoa pods
+        run: |
+          cd ios
+          pod install
       # Build iOS archive
       - name: Build iOS Archive
         run: |
