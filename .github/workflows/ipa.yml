@@ -45,7 +45,7 @@ jobs:
         zip -r Runner.ipa Payload
 
         # Move the IPA to the workspace for upload
-        mv Runner.ipa ../../..
+        mv Runner.ipa ../
       shell: bash
 
     # Upload the IPA as an artifact
