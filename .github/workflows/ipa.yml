@@ -30,12 +30,10 @@ jobs:
       run: flutter build ios --release --no-codesign
 
     - name: Package unsigned .ipa
-      run: |
-        cd $GITHUB_WORKSPACE/build/ios/iphoneos
-        zip -r "$GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa" Runner.app
+      run: xcrun -sdk iphoneos PackageApplication -v "$GITHUB_WORKSPACE/build/ios/iphoneos/Runner.app" -o "$GITHUB_WORKSPACE/build/ios/iphoneos/Runner.ipa"
 
     - name: Upload unsigned .ipa as an artifact
       uses: actions/upload-artifact@v3
       with:
         name: unsigned-ipa
-        path: $GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa
+        path: $GITHUB_WORKSPACE/build/ios/iphoneos/Runner.ipa
