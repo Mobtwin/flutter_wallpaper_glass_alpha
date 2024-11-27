@@ -29,11 +29,28 @@ jobs:
     - name: Build iOS app (unsigned)
       run: flutter build ios --release --no-codesign
 
-    - name: Package unsigned .ipa
-      run: xcrun -sdk iphoneos PackageApplication -v "$GITHUB_WORKSPACE/build/ios/iphoneos/Runner.app" -o "$GITHUB_WORKSPACE/build/ios/iphoneos/Runner.ipa"
+    # Prepare IPA file
+    - name: Create IPA Package
+      run: |
+        # Navigate to the build directory
+        cd build/ios/iphoneos
+          
+        # Create the Payload directory
+        mkdir Payload
 
-    - name: Upload unsigned .ipa as an artifact
+        # Move the Runner.app into the Payload directory
+        mv Runner.app Payload/
+
+        # Zip the Payload directory into an IPA
+        zip -r Runner.ipa Payload
+
+        # Move the IPA to the workspace for upload
+        mv Runner.ipa ../../..
+      shell: bash
+
+    # Upload the IPA as an artifact
+    - name: Upload IPA Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: unsigned-ipa
-        path: $GITHUB_WORKSPACE/build/ios/iphoneos/Runner.ipa
+        name: Runner.ipa
+        path: build/ios/Runner.ipa
