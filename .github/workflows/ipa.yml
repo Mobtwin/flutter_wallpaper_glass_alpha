@@ -1,0 +1,43 @@
+name: Build Unsigned iOS .ipa
+
+on:
+  push:
+    branches:
+      - main  # You can adjust this to the branch you want to trigger on
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest  # macOS runner is required for iOS builds
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.7.0'  # Specify your Flutter version
+
+    - name: Install dependencies
+      run: flutter pub get
+
+    - name: Build iOS app (unsigned)
+      run: flutter build ios --release --no-codesign
+
+    - name: Package .app into .ipa (unsigned)
+      run: |
+        # Create a temporary directory for the .ipa file
+        mkdir -p $GITHUB_WORKSPACE/build/unsigned-ipa
+
+        # Use xcrun to package the .app into an .ipa
+        xcrun -sdk iphoneos PackageApplication -v $GITHUB_WORKSPACE/build/ios/iphoneos/Runner.app -o $GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa
+
+    - name: Upload unsigned .ipa as an artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: unsigned-ipa
+        path: $GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa
