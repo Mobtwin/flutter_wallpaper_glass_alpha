@@ -29,16 +29,37 @@ jobs:
     - name: Build iOS app (unsigned)
       run: flutter build ios --release --no-codesign
 
-    - name: Package .app into .ipa (unsigned)
+    - name: Export unsigned .ipa using xcodebuild
       run: |
-        # Create a temporary directory for the .ipa file
-        mkdir -p $GITHUB_WORKSPACE/build/unsigned-ipa
+        # Set paths to the generated app and the export directory
+        APP_PATH="$GITHUB_WORKSPACE/build/ios/iphoneos/Runner.app"
+        EXPORT_DIR="$GITHUB_WORKSPACE/build/unsigned-ipa"
 
-        # Use xcrun to package the .app into an .ipa
-        xcrun -sdk iphoneos PackageApplication -v $GITHUB_WORKSPACE/build/ios/iphoneos/Runner.app -o $GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa
+        # Create export directory if it doesn't exist
+        mkdir -p "$EXPORT_DIR"
+
+        # Create an export options plist (needed for xcodebuild export)
+        cat > "$EXPORT_DIR/exportOptions.plist" << EOF
+        <?xml version="1.0" encoding="UTF-8"?>
+        <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>ad-hoc</string> <!-- You can use 'ad-hoc', 'development', or 'enterprise' -->
+            <key>teamID</key>
+            <string>N985XLQHFY</string>  <!-- Replace with your Apple Developer Team ID -->
+            <key>compileBitcode</key>
+            <false/>
+          </dict>
+        </plist>
+        EOF
+
+        # Export the unsigned .ipa using xcodebuild
+        xcodebuild -exportArchive -archivePath "$APP_PATH" \
+                    -exportOptionsPlist "$EXPORT_DIR/exportOptions.plist" \
+                    -exportPath "$EXPORT_DIR"
 
     - name: Upload unsigned .ipa as an artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: unsigned-ipa
         path: $GITHUB_WORKSPACE/build/unsigned-ipa/Runner.ipa
