@@ -38,7 +38,10 @@ jobs:
       env:
         CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
         PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
-
+    - name: Inspect Certificate File
+      run: |
+        file certificate.p12
+        ls -lh certificate.p12
     # Step 5: Import Certificate
     - name: Import Certificate
       run: |
