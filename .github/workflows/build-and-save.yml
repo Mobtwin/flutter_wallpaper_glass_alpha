@@ -48,8 +48,6 @@ jobs:
         run: |
           security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" \
             -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple: \
-            -s -k "" ~/Library/Keychains/login.keychain-db
       
       # Debugging: Check Installed Certificates
       - name: Check Installed Certificates
