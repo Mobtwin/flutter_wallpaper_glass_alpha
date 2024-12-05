@@ -86,7 +86,9 @@ jobs:
       # Install CocoaPods
       - name: Install CocoaPods
         run: |
+          flutter clean
           cd ios
+          rm -rf Pods Podfile.lock
           pod install
 
       # Build iOS Archive
