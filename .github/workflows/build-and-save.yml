@@ -55,7 +55,7 @@ jobs:
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.example.wallpapers</key>
-                  <string>TestIPA</string>
+                  <string>TestIPAPublish final</string>
               </dict>
               <key>signingStyle</key>
               <string>automatic</string>
@@ -80,12 +80,13 @@ jobs:
         run: |
           cd ios
           xcodebuild archive \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -archivePath ./build/Runner.xcarchive \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=${{ secrets.DEVELOPMENT_TEAM }} \
-            PROVISIONING_PROFILE_SPECIFIER=TestIPA
+              -workspace Runner.xcworkspace \
+              -scheme Runner \
+              -archivePath ./build/Runner.xcarchive \
+              CODE_SIGN_STYLE=automatic \
+              DEVELOPMENT_TEAM=N985XLQHFY \
+              PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"
+
         env:
           FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
 
