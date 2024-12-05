@@ -3,7 +3,7 @@ name: Build Unsigned iOS .ipa
 on:
   push:
     branches:
-      - main  # You can adjust this to the branch you want to trigger on
+      - main
   pull_request:
     branches:
       - main
@@ -16,7 +16,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-      # Set up Flutter
+
+    # Set up Flutter
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
@@ -29,12 +30,21 @@ jobs:
     - name: Build iOS app (unsigned)
       run: flutter build ios --release --no-codesign
 
+    # Embed Provisioning Profile
+    - name: Embed Provisioning Profile
+      run: |
+        
+
+        # Copy the provisioning profile to the app bundle
+        cp ./embedded.mobileprovision build/ios/iphoneos/Runner.app/embedded.mobileprovision
+      shell: bash
+
     # Prepare IPA file
     - name: Create IPA Package
       run: |
         # Navigate to the build directory
         cd build/ios/iphoneos
-          
+
         # Create the Payload directory
         mkdir Payload
 
