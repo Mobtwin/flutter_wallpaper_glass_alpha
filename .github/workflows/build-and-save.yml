@@ -97,9 +97,10 @@ jobs:
               -workspace Runner.xcworkspace \
               -scheme Runner \
               -archivePath ./build/Runner.xcarchive \
-              CODE_SIGN_STYLE=manual \
+              CODE_SIGN_STYLE=Manual \
               DEVELOPMENT_TEAM=N985XLQHFY \
-              PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"
+              PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
+              CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)"
 
         env:
           FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
