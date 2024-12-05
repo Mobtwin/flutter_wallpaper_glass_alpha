@@ -1,12 +1,6 @@
-name: Build Unsigned iOS .ipa
+name: Build and Sign iOS .ipa
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -27,34 +21,40 @@ jobs:
     - name: Install dependencies
       run: flutter pub get
 
+    # Build the iOS app
     - name: Build iOS app (unsigned)
       run: flutter build ios --release --no-codesign
 
-    # Embed Provisioning Profile
-    - name: Embed Provisioning Profile
+    # Decode and install the Apple Certificate
+    - name: Install Apple Certificate
       run: |
-        
-
-        # Copy the provisioning profile to the app bundle
-        cp ./embedded.mobileprovision build/ios/iphoneos/Runner.app/embedded.mobileprovision
+        echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+        security import certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple: -s -k "$APPLE_CERTIFICATE_PASSWORD" ~/Library/Keychains/login.keychain-db
       shell: bash
 
-    # Prepare IPA file
+    # Decode and install the Provisioning Profile
+    - name: Install Provisioning Profile
+      run: |
+        echo "$PROVISIONING_PROFILE" | base64 --decode > embedded.mobileprovision
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp embedded.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+      shell: bash
+
+    # Sign the App
+    - name: Sign the App
+      run: |
+        cd build/ios/iphoneos
+        codesign -f -s "Apple Distribution" --entitlements Runner.app/archived-expanded-entitlements.xcent --timestamp=none Runner.app
+      shell: bash
+
+    # Create IPA Package
     - name: Create IPA Package
       run: |
-        # Navigate to the build directory
         cd build/ios/iphoneos
-
-        # Create the Payload directory
         mkdir Payload
-
-        # Move the Runner.app into the Payload directory
         mv Runner.app Payload/
-
-        # Zip the Payload directory into an IPA
         zip -r Runner.ipa Payload
-
-        # Move the IPA to the workspace for upload
         mv Runner.ipa ../
       shell: bash
 
