@@ -29,6 +29,7 @@ jobs:
       # Download and configure Provisioning Profile
       - name: Download Provisioning Profile
         run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           curl -o ~/Library/MobileDevice/Provisioning\ Profiles/TestIPAPublish_final.mobileprovision \
             ${{ secrets.PROVISIONING_PROFILE_URL }}
 
