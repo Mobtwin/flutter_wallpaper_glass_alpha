@@ -100,7 +100,9 @@ jobs:
               CODE_SIGN_STYLE=Manual \
               DEVELOPMENT_TEAM=N985XLQHFY \
               PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
-              CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)"
+              CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
+              OTHER_CODE_SIGN_FLAGS="--deep" \
+              ONLY_ACTIVE_ARCH=NO
 
         env:
           FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
