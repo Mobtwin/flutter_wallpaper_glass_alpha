@@ -1,6 +1,12 @@
-name: Build and Sign iOS .ipa
+name: Build Unsigned iOS .ipa
 
 on:
+  push:
+    branches:
+      - main  # Adjust this to your desired branch
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -8,57 +14,65 @@ jobs:
     runs-on: macos-latest  # macOS runner is required for iOS builds
 
     steps:
+    # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Set up Flutter
+    # Step 2: Set up Flutter
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         channel: stable
         flutter-version: '3.24.2'
 
+    # Step 3: Install dependencies
     - name: Install dependencies
       run: flutter pub get
 
-    # Build the iOS app
+    # Step 4: Download Certificate and Provisioning Profile
+    - name: Download Certificate and Provisioning Profile
+      run: |
+        # Replace these URLs with your backend API endpoints
+        curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
+        curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
+      env:
+        CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
+        PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
+
+    # Step 5: Import Certificate
+    - name: Import Certificate
+      run: |
+        security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+
+    # Step 6: Build iOS app (unsigned)
     - name: Build iOS app (unsigned)
       run: flutter build ios --release --no-codesign
 
-    # Decode and install the Apple Certificate
-    - name: Install Apple Certificate
+    # Step 7: Embed Provisioning Profile
+    - name: Embed Provisioning Profile
       run: |
-        echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-        security import certificate.p12 -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-        security set-key-partition-list -S apple-tool:,apple: -s -k "$APPLE_CERTIFICATE_PASSWORD" ~/Library/Keychains/login.keychain-db
-      shell: bash
+        cp embedded.mobileprovision build/ios/iphoneos/Runner.app/embedded.mobileprovision
 
-    # Decode and install the Provisioning Profile
-    - name: Install Provisioning Profile
-      run: |
-        echo "$PROVISIONING_PROFILE" | base64 --decode > embedded.mobileprovision
-        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-        cp embedded.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
-      shell: bash
-
-    # Sign the App
-    - name: Sign the App
-      run: |
-        cd build/ios/iphoneos
-        codesign -f -s "Apple Distribution" --entitlements Runner.app/archived-expanded-entitlements.xcent --timestamp=none Runner.app
-      shell: bash
-
-    # Create IPA Package
+    # Step 8: Create IPA Package
     - name: Create IPA Package
       run: |
+        # Navigate to the build directory
         cd build/ios/iphoneos
+          
+        # Create the Payload directory
         mkdir Payload
+
+        # Move the Runner.app into the Payload directory
         mv Runner.app Payload/
+
+        # Zip the Payload directory into an IPA
         zip -r Runner.ipa Payload
+
+        # Move the IPA to the workspace for upload
         mv Runner.ipa ../
       shell: bash
 
-    # Upload the IPA as an artifact
+    # Step 9: Upload the IPA as an artifact
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v3
       with:
