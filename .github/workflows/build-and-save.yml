@@ -83,7 +83,7 @@ jobs:
               -workspace Runner.xcworkspace \
               -scheme Runner \
               -archivePath ./build/Runner.xcarchive \
-              CODE_SIGN_STYLE=automatic \
+              CODE_SIGN_STYLE=manual  \
               DEVELOPMENT_TEAM=N985XLQHFY \
               PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"
 
