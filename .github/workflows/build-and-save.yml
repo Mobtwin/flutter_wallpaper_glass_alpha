@@ -55,10 +55,13 @@ jobs:
               <key>provisioningProfiles</key>
               <dict>
                   <key>com.example.wallpapers</key>
-                  <string>TestIPAPublish_final</string>
+                  <string>TestIPA</string>
               </dict>
               <key>signingStyle</key>
-              <string>manual</string>
+              <string>automatic</string>
+              <!-- Specifies the signing certificate for the app -->
+              <key>signingCertificate</key>
+              <string>iPhone Distribution: James Oldwoods (N985XLQHFY)</string> 
               <key>stripSwiftSymbols</key>
               <true/>
               <key>teamID</key>
