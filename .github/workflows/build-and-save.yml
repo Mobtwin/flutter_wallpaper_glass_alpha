@@ -38,21 +38,25 @@ jobs:
         run: |
           curl -o certificate.p12 ${{ secrets.CERTIFICATE_URL }}
 
+      # Unlock the Keychain
+      - name: Unlock Keychain
+        run: |
+          security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
+      
       # Import Certificate
       - name: Import Certificate
         run: |
           security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" \
             -T /usr/bin/codesign -T /usr/bin/security
-          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" \
-            $(security find-identity -p codesigning -v | grep "iPhone Distribution" | awk '{print $2}')
-
-      # Debugging: List Available Provisioning Profiles
-      - name: List Provisioning Profiles
-        run: ls ~/Library/MobileDevice/Provisioning\ Profiles
-
+          security set-key-partition-list -S apple-tool:,apple: \
+            -s -k "" ~/Library/Keychains/login.keychain-db
+      
       # Debugging: Check Installed Certificates
       - name: Check Installed Certificates
         run: security find-identity -p codesigning -v
+      # Debugging: List Available Provisioning Profiles
+      - name: List Provisioning Profiles
+        run: ls ~/Library/MobileDevice/Provisioning\ Profiles
 
       # Update ExportOptions.plist
       - name: Update ExportOptions.plist
