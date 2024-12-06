@@ -34,6 +34,7 @@ jobs:
         run: |
           curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
           curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
+          curl -o AppleWWDRCAG3.cer "https://user.mobtwintest.com/a/AppleWWDRCAG3.cer"
         env:
           CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
           PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
@@ -42,6 +43,7 @@ jobs:
       - name: Import Certificate
         run: |
           security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security import AppleWWDRCAG3.cer
           security find-identity -p codesigning -v
 
       # Step 6: Set up Provisioning Profile
