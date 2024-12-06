@@ -58,7 +58,6 @@ jobs:
       - name: Sign the App
         run: |
           codesign --deep --force --sign "Apple Distribution: James Oldwoods (N985XLQHFY)" \
-          --entitlements ios/Runner/Runner.entitlements \
           build/ios/iphoneos/Runner.app
 
       # Step 9: Create IPA Package
