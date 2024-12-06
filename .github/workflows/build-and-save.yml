@@ -78,7 +78,7 @@ jobs:
       - name: Sign iOS app with xcodebuild
         run: |
           cd build/ios/iphoneos
-          xcodebuild -workspace ios/Runner.xcworkspace \
+          xcodebuild -workspace $GITHUB_WORKSPACE/ios/Runner.xcworkspace \
                      -scheme Runner \
                      -configuration Release \
                      -sdk iphoneos \
