@@ -85,8 +85,7 @@ jobs:
                      -archivePath $PWD/Runner.xcarchive \
                      clean archive \
                      CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
-                     PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
-                     CODE_SIGN_STYLE="Automatic" 
+                     PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"  
 
       # Step 9: Create IPA Package
       - name: Create IPA Package
