@@ -42,6 +42,8 @@ jobs:
       - name: Import Certificate
         run: |
           security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security find-identity -p codesigning -v
+
 
       # Step 6: Build iOS app (unsigned)
       - name: Build iOS app (unsigned)
@@ -55,7 +57,7 @@ jobs:
       # Step 8: Sign the App
       - name: Sign the App
         run: |
-          codesign --deep --force --sign "iPhone Distribution: James Oldwoods" \
+          codesign --deep --force --sign "Apple Distribution: James Oldwoods (N985XLQHFY)" \
           --entitlements ios/Runner/Runner.entitlements \
           build/ios/iphoneos/Runner.app
 
