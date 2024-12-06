@@ -76,15 +76,15 @@ jobs:
         run: |
           cd build/ios/iphoneos
           xcodebuild -workspace $GITHUB_WORKSPACE/ios/Runner.xcworkspace \
-                     -scheme Runner \
-                     -configuration Release \
-                     -sdk iphoneos \
-                     -archivePath $PWD/Runner.xcarchive \
-                     clean archive \
-                     CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
-                     PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"  \
-                     CODE_SIGN_STYLE="Manual"  # Use manual signing for the app \
-                     TEAM_ID="N985XLQHFY" \
+             -scheme Runner \
+             -configuration Release \
+             -sdk iphoneos \
+             -archivePath $PWD/Runner.xcarchive \
+             clean archive \
+             CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
+             PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
+             CODE_SIGN_STYLE=Manual \
+             DEVELOPMENT_TEAM=N985XLQHFY
 
       # Step 9: Create IPA Package
       - name: Create IPA Package
