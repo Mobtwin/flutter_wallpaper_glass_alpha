@@ -33,7 +33,7 @@ jobs:
       - name: Download Certificate and Provisioning Profile
         run: |
           curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
-          curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
+          curl -o 2ab0d959-dc2b-443c-a1bb-d322d8219088.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
           curl -o AppleWWDRCAG3.cer "https://user.mobtwintest.com/a/AppleWWDRCAG3.cer"
         env:
           CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
@@ -50,7 +50,7 @@ jobs:
       - name: Set up Provisioning Profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp embedded.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp 2ab0d959-dc2b-443c-a1bb-d322d8219088.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
       # Step 7: Build iOS app (signed)
       - name: Build iOS app (signed)
@@ -85,7 +85,7 @@ jobs:
              -archivePath $PWD/Runner.xcarchive \
              clean archive \
              CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
-             PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
+             PROVISIONING_PROFILE_SPECIFIER="2ab0d959-dc2b-443c-a1bb-d322d8219088" \
              CODE_SIGN_STYLE=Manual \
              DEVELOPMENT_TEAM=N985XLQHFY
 
