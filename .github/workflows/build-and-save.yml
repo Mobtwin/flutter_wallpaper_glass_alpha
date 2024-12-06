@@ -55,8 +55,8 @@ jobs:
       # Step 6: Set up Provisioning Profile
       - name: Set up Provisioning Profile
         run: |
-          sudo mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          sudo cp 2ab0d959-dc2b-443c-a1bb-d322d8219088.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp 2ab0d959-dc2b-443c-a1bb-d322d8219088.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
       # Step 7: Build iOS app (signed)
       - name: Build iOS app (signed)
@@ -83,7 +83,7 @@ jobs:
       - name: Sign iOS app with xcodebuild
         run: |
           cd build/ios/iphoneos
-          sudo xcodebuild -workspace $GITHUB_WORKSPACE/ios/Runner.xcworkspace \
+          xcodebuild -workspace $GITHUB_WORKSPACE/ios/Runner.xcworkspace \
              -scheme Runner \
              -configuration Release \
              -sdk iphoneos \
