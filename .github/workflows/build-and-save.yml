@@ -1,125 +1,79 @@
-name: Build Flutter iOS App and Transfer IPA
+name: Build and Sign iOS .ipa
 
 on:
-  repository_dispatch:
-    types: [dispatch-ios]
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  build-ios:
-    name: Build iOS
+  build:
     runs-on: macos-latest
 
     steps:
-      # Checkout repository code
-      - name: Checkout Code
+      # Step 1: Checkout the code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Flutter
+      # Step 2: Set up Flutter
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: '3.24.2'
 
-      # Install dependencies
-      - name: Install Dependencies
+      # Step 3: Install dependencies
+      - name: Install dependencies
         run: flutter pub get
 
-      # Download and configure Provisioning Profile
-      - name: Download Provisioning Profile
+      # Step 4: Download Certificate and Provisioning Profile
+      - name: Download Certificate and Provisioning Profile
         run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          curl -o ~/Library/MobileDevice/Provisioning\ Profiles/TestIPAPublish_final.mobileprovision \
-            ${{ secrets.PROVISIONING_PROFILE_URL }}
+          curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
+          curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
+        env:
+          CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
+          PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
 
-      # Download and configure Certificate
-      - name: Download Certificate
-        run: |
-          curl -o certificate.p12 ${{ secrets.CERTIFICATE_URL }}
-
-      # Unlock the Keychain
-      - name: Unlock Keychain
-        run: |
-          security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
-      
-      # Import Certificate
+      # Step 5: Import Certificate
       - name: Import Certificate
         run: |
-          security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" \
-            -T /usr/bin/codesign -T /usr/bin/security
-      
-      # Debugging: Check Installed Certificates
-      - name: Check Installed Certificates
-        run: security find-identity -p codesigning -v
-      # Debugging: List Available Provisioning Profiles
-      - name: List Provisioning Profiles
-        run: ls ~/Library/MobileDevice/Provisioning\ Profiles
+          security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security find-identity -p codesigning -v
 
-      # Update ExportOptions.plist
-      - name: Update ExportOptions.plist
+      # Step 6: Set up Provisioning Profile
+      - name: Set up Provisioning Profile
         run: |
-          cat > ios/ExportOptions.plist <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store</string>
-              <key>provisioningProfiles</key>
-              <dict>
-                  <key>com.example.wallpapers</key>
-                  <string>TestIPAPublish final</string>
-              </dict>
-              <key>signingStyle</key>
-              <string>manual</string>
-              <key>signingCertificate</key>
-              <string>iPhone Distribution: James Oldwoods (N985XLQHFY)</string> 
-              <key>stripSwiftSymbols</key>
-              <true/>
-              <key>teamID</key>
-              <string>N985XLQHFY</string>
-          </dict>
-          </plist>
-          EOF
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp embedded.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      # Install CocoaPods
-      - name: Install CocoaPods
+      # Step 7: Build iOS app (signed)
+      - name: Build iOS app (signed)
+        run: flutter build ios --release --no-codesign
+      - name : check entitlements
+        run : |
+          ls ios/Runner/Runner.entitlements
+      # Step 8: Sign the app with Xcode's codesign
+      - name: Sign iOS app
         run: |
-          cd ios
-          pod install
+          cd build/ios/iphoneos
+          codesign -f -s "Apple Distribution: James Oldwoods (N985XLQHFY)" --entitlements ios/Runner/Runner.entitlements Runner.app
 
-      # Build iOS Archive
-      - name: Build iOS Archive
+      # Step 9: Create IPA Package
+      - name: Create IPA Package
         run: |
-          cd ios
-          xcodebuild archive \
-              -workspace Runner.xcworkspace \
-              -scheme Runner \
-              -archivePath ./build/Runner.xcarchive \
-              CODE_SIGN_STYLE=Automatic \
-              DEVELOPMENT_TEAM=N985XLQHFY \
-              PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
-              CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
-              OTHER_CODE_SIGN_FLAGS="--deep" \
-              ONLY_ACTIVE_ARCH=NO
+          cd build/ios/iphoneos
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r Runner-signed.ipa Payload
+          mv Runner-signed.ipa ../
 
-        env:
-          FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
-
-      # Export IPA
-      - name: Export IPA
-        run: |
-          xcodebuild -exportArchive \
-            -archivePath ./ios/build/Runner.xcarchive \
-            -exportPath ./ios/build/ipa \
-            -exportOptionsPlist ./ios/ExportOptions.plist
-        env:
-          FLUTTER_ROOT: ${{ runner.tool_cache }}/flutter
-
-      # Upload IPA as artifact
-      - name: Upload IPA Artifact
+      # Step 10: Upload Signed IPA as Artifact
+      - name: Upload Signed IPA
         uses: actions/upload-artifact@v3
         with:
-          name: ios-ipa
-          path: ios/build/ipa/Runner.ipa
+          name: Runner-signed.ipa
+          path: build/ios/Runner-signed.ipa
