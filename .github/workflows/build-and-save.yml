@@ -64,11 +64,20 @@ jobs:
           echo '    <string>production</string>' >> ios/Runner/Runner.entitlements
           echo '  </dict>' >> ios/Runner/Runner.entitlements
           echo '</plist>' >> ios/Runner/Runner.entitlements
-      # Step 8: Sign the app with Xcode's codesign
+      # Step: Verify Working Directory and Entitlements File
+      - name: Verify Working Directory and Entitlements File
+        run: |
+          pwd
+          ls -l ios/Runner
+          cat ios/Runner/Runner.entitlements
+
+      # Step: Sign the iOS app
       - name: Sign iOS app
         run: |
           cd build/ios/iphoneos
-          codesign -f -s "Apple Distribution: James Oldwoods (N985XLQHFY)" --entitlements ios/Runner/Runner.entitlements Runner.app
+          # Verify identity and entitlements file path
+          security find-identity -p codesigning
+          codesign -f -s "Apple Distribution: James Oldwoods (N985XLQHFY)" --entitlements $(pwd)/ios/Runner/Runner.entitlements Runner.app
 
       # Step 9: Create IPA Package
       - name: Create IPA Package
