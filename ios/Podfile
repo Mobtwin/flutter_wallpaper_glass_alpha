@@ -40,8 +40,11 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+    
+    # Set CODE_SIGN_IDENTITY to None for all Pods to prevent them from being signed
     target.build_configurations.each do |config|
-      config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = 'Automatic'
+      config.build_settings['CODE_SIGN_IDENTITY'] = 'None'
+      config.build_settings['PROVISIONING_PROFILE_SPECIFIER'] = 'None'  # Optional: Prevent any provisioning profile from being applied
     end
   end
 end
