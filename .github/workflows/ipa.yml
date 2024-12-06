@@ -1,9 +1,9 @@
-name: Build Unsigned iOS .ipa
+name: Build and Sign iOS .ipa
 
 on:
   push:
     branches:
-      - main  # Adjust this to your desired branch
+      - main
   pull_request:
     branches:
       - main
@@ -11,73 +11,66 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest  # macOS runner is required for iOS builds
+    runs-on: macos-latest
 
     steps:
-    # Step 1: Checkout the code
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Step 2: Set up Flutter
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        channel: stable
-        flutter-version: '3.24.2'
+      # Step 2: Set up Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.24.2'
 
-    # Step 3: Install dependencies
-    - name: Install dependencies
-      run: flutter pub get
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
 
-    # Step 4: Download Certificate and Provisioning Profile
-    - name: Download Certificate and Provisioning Profile
-      run: |
-        # Replace these URLs with your backend API endpoints
-        curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
-        curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
-      env:
-        CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
-        PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
-    - name: Inspect Certificate File
-      run: |
-        file certificate.p12
-        ls -lh certificate.p12
-    # Step 5: Import Certificate
-    - name: Import Certificate
-      run: |
-        security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+      # Step 4: Download Certificate and Provisioning Profile
+      - name: Download Certificate and Provisioning Profile
+        run: |
+          curl -o certificate.p12 "${{ secrets.CERTIFICATE_URL }}"
+          curl -o embedded.mobileprovision "${{ secrets.PROVISIONING_PROFILE_URL }}"
+        env:
+          CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
+          PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
 
-    # Step 6: Build iOS app (unsigned)
-    - name: Build iOS app (unsigned)
-      run: flutter build ios --release --no-codesign
+      # Step 5: Import Certificate
+      - name: Import Certificate
+        run: |
+          security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
 
-    # Step 7: Embed Provisioning Profile
-    - name: Embed Provisioning Profile
-      run: |
-        cp embedded.mobileprovision build/ios/iphoneos/Runner.app/embedded.mobileprovision
+      # Step 6: Build iOS app (unsigned)
+      - name: Build iOS app (unsigned)
+        run: flutter build ios --release --no-codesign
 
-    # Step 8: Create IPA Package
-    - name: Create IPA Package
-      run: |
-        # Navigate to the build directory
-        cd build/ios/iphoneos
-          
-        # Create the Payload directory
-        mkdir Payload
+      # Step 7: Embed Provisioning Profile
+      - name: Embed Provisioning Profile
+        run: |
+          cp embedded.mobileprovision build/ios/iphoneos/Runner.app/embedded.mobileprovision
 
-        # Move the Runner.app into the Payload directory
-        mv Runner.app Payload/
+      # Step 8: Sign the App
+      - name: Sign the App
+        run: |
+          codesign --deep --force --sign "iPhone Distribution: James Oldwoods (N985XLQHFY)" \
+          --entitlements ios/Runner/Runner.entitlements \
+          build/ios/iphoneos/Runner.app
 
-        # Zip the Payload directory into an IPA
-        zip -r Runner.ipa Payload
+      # Step 9: Create IPA Package
+      - name: Create IPA Package
+        run: |
+          cd build/ios/iphoneos
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r Runner-signed.ipa Payload
+          mv Runner-signed.ipa ../
 
-        # Move the IPA to the workspace for upload
-        mv Runner.ipa ../
-      shell: bash
-
-    # Step 9: Upload the IPA as an artifact
-    - name: Upload IPA Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: Runner.ipa
-        path: build/ios/Runner.ipa
+      # Step 10: Upload Signed IPA as Artifact
+      - name: Upload Signed IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: Runner-signed.ipa
+          path: build/ios/Runner-signed.ipa
