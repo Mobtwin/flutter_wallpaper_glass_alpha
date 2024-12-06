@@ -42,12 +42,13 @@ jobs:
       # Step 5: Import Certificate
       - name: Import Certificate
         run: |
-          security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-          security import certificate.p12 -P "${{ secrets.CERTIFICATE_PASSWORD }}" -k ~/Library/Keychains/login.keychain-db
+          security import certificate.p12 -k ~/Library/Keychains/login.keychain-db -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
           security import AppleWWDRCAG3.cer
           security unlock-keychain -p "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/login.keychain-db
           security list-keychains -d user -s ~/Library/Keychains/login.keychain-db
           security find-identity -p codesigning -v
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/login.keychain-db
+
 
       # Step 6: Set up Provisioning Profile
       - name: Set up Provisioning Profile
