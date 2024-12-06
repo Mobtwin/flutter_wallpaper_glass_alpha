@@ -71,9 +71,6 @@ jobs:
           ls -l ios/Runner
           cat ios/Runner/Runner.entitlements
 
-      # Step: Sign the iOS app
-      - name: Sign iOS app
-        run: |
                 # Step 8: Use xcodebuild to sign the app with the provisioning profile
       - name: Sign iOS app with xcodebuild
         run: |
@@ -86,7 +83,8 @@ jobs:
                      clean archive \
                      CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
                      PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final"  \
-                     CODE_SIGN_STYLE="Manual"  # Use manual signing for the app
+                     CODE_SIGN_STYLE="Manual"  # Use manual signing for the app \
+                     TEAM_ID="N985XLQHFY" \
 
       # Step 9: Create IPA Package
       - name: Create IPA Package
