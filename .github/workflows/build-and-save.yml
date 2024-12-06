@@ -55,7 +55,7 @@ jobs:
         run: flutter build ios --release --no-codesign
       - name : check entitlements
         run : |
-          ls ios/Runner/Runner.entitlements
+          ls ios/Runner/
       # Step 8: Sign the app with Xcode's codesign
       - name: Sign iOS app
         run: |
