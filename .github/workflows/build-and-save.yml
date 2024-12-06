@@ -53,9 +53,17 @@ jobs:
       # Step 7: Build iOS app (signed)
       - name: Build iOS app (signed)
         run: flutter build ios --release --no-codesign
-      - name : check entitlements
-        run : |
-          ls ios/Runner/
+      # Step: Create Entitlements File
+      - name: Create Entitlements File
+        run: |
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > ios/Runner/Runner.entitlements
+          echo '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' >> ios/Runner/Runner.entitlements
+          echo '<plist version="1.0">' >> ios/Runner/Runner.entitlements
+          echo '  <dict>' >> ios/Runner/Runner.entitlements
+          echo '    <key>aps-environment</key>' >> ios/Runner/Runner.entitlements
+          echo '    <string>production</string>' >> ios/Runner/Runner.entitlements
+          echo '  </dict>' >> ios/Runner/Runner.entitlements
+          echo '</plist>' >> ios/Runner/Runner.entitlements
       # Step 8: Sign the app with Xcode's codesign
       - name: Sign iOS app
         run: |
