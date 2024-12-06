@@ -74,10 +74,19 @@ jobs:
       # Step: Sign the iOS app
       - name: Sign iOS app
         run: |
+                # Step 8: Use xcodebuild to sign the app with the provisioning profile
+      - name: Sign iOS app with xcodebuild
+        run: |
           cd build/ios/iphoneos
-          # Verify identity and entitlements file path
-          security find-identity -p codesigning
-          codesign -f -s "Apple Distribution: James Oldwoods (N985XLQHFY)" --provisioning-profile "~/Library/MobileDevice/Provisioning Profiles/embedded.mobileprovision" --entitlements /Users/runner/work/flutter_wallpaper_glass_alpha/flutter_wallpaper_glass_alpha/ios/Runner/Runner.entitlements Runner.app
+          xcodebuild -workspace ios/Runner.xcworkspace \
+                     -scheme Runner \
+                     -configuration Release \
+                     -sdk iphoneos \
+                     -archivePath $PWD/Runner.xcarchive \
+                     clean archive \
+                     CODE_SIGN_IDENTITY="Apple Distribution: James Oldwoods (N985XLQHFY)" \
+                     PROVISIONING_PROFILE_SPECIFIER="TestIPAPublish final" \
+                     CODE_SIGN_STYLE="Automatic" 
 
       # Step 9: Create IPA Package
       - name: Create IPA Package
