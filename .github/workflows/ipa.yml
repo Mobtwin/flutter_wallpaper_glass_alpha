@@ -55,7 +55,7 @@ jobs:
       # Step 8: Sign the App
       - name: Sign the App
         run: |
-          codesign --deep --force --sign "iPhone Distribution: James Oldwoods (N985XLQHFY)" \
+          codesign --deep --force --sign "iPhone Distribution: James Oldwoods" \
           --entitlements ios/Runner/Runner.entitlements \
           build/ios/iphoneos/Runner.app
 
