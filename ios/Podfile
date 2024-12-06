@@ -40,7 +40,7 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-    
+    next if target.name == 'Runner' # Skip the Runner target
     # Set CODE_SIGN_IDENTITY to None for all Pods to prevent them from being signed
     target.build_configurations.each do |config|
         config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
