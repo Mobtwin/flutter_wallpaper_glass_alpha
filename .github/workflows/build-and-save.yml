@@ -50,7 +50,7 @@ jobs:
           security list-keychains -s ~/Library/Keychains/login.keychain-db
           security find-identity -p codesigning -v
           
-      #security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/login.keychain-db
+      #security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/login.keychain-db
       - name: Unlock keychain
         run: |
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
