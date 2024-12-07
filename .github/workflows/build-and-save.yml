@@ -49,6 +49,10 @@ jobs:
           security import AppleWWDRCAG3.cer
           security list-keychains -s ~/Library/Keychains/login.keychain-db
           security find-identity -p codesigning -v
+
+      - name: Unlock keychain
+        run: |
+          security unlock-keychain ~/Library/Keychains/login.keychain
           
 
 
