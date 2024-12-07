@@ -39,33 +39,34 @@ jobs:
           CERTIFICATE_URL: ${{ secrets.CERTIFICATE_URL }}
           PROVISIONING_PROFILE_URL: ${{ secrets.PROVISIONING_PROFILE_URL }}
 
-      #security create-keychain -p "${{ secrets.CERTIFICATE_PASSWORD }}" build.keychain
+      #security import certificate.p12 -k ~/Library/Keychains/login.keychain-db -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
       #security unlock-keychain -p "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/build.keychain
       #security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
       # Step 5: Import Certificate
       - name: Import Certificate
         run: |
-          security import certificate.p12 -k ~/Library/Keychains/login.keychain-db -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+          security create-keychain -p "${{ secrets.CERTIFICATE_PASSWORD }}" build.keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
           security import AppleWWDRCAG3.cer
-          security list-keychains -s ~/Library/Keychains/login.keychain-db
+          security list-keychains -s ~/Library/Keychains/build.keychain
           security find-identity -p codesigning -v
           
       #security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/login.keychain-db
       - name: Unlock keychain
         run: |
-          security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
+          security unlock-keychain -p "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/build.keychain
       - name: list keychain
         run: |
           security list-keychains
       - name: info keychain
         run: |
-          security show-keychain-info ~/Library/Keychains/login.keychain-db
+          security show-keychain-info ~/Library/Keychains/build.keychain
       - name: find-identity keychain
         run: |
-          security find-identity -p codesigning -v ~/Library/Keychains/login.keychain-db
+          security find-identity -p codesigning -v ~/Library/Keychains/build.keychain
       - name: find-identity keychain
         run: |
-          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple: -s -k "${{ secrets.CERTIFICATE_PASSWORD }}" ~/Library/Keychains/build.keychain
 
 
 
