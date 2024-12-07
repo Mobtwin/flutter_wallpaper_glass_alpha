@@ -54,7 +54,21 @@ jobs:
       - name: Unlock keychain
         run: |
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
-          security list-keychains -s ~/Library/Keychains/login.keychain-db
+      - name: list keychain
+        run: |
+          security list-keychains
+      - name: info keychain
+        run: |
+          security show-keychain-info ~/Library/Keychains/login.keychain-db
+      - name: find-identity keychain
+        run: |
+          security find-identity -p codesigning -v ~/Library/Keychains/login.keychain-db
+      - name: find-identity keychain
+        run: |
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/login.keychain-db
+
+
+
 
 
 
