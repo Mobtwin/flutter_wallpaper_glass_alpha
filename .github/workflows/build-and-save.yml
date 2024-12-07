@@ -116,18 +116,72 @@ jobs:
              CODE_SIGN_STYLE=Manual \
              DEVELOPMENT_TEAM=N985XLQHFY
 
+      - name: create EXPORT OPTIONS PLIST
+        run: |
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <plist version="1.0">
+              <dict>
+                  <!-- The method specifies how the IPA will be exported -->
+                  <key>method</key>
+                  <string>app-store</string> <!-- Use "ad-hoc" for Ad-hoc distribution, or "enterprise" for Enterprise apps -->
+          
+                  <!-- The Team ID for signing -->
+                  <key>teamID</key>
+                  <string>N985XLQHFY</string> <!-- Replace with your Team ID -->
+          
+                  <!-- The provisioning profile to use -->
+                  <key>provisioningProfiles</key>
+                  <dict>
+                      <key>com.example.wallpapers</key> <!-- Replace with your app's bundle identifier -->
+                      <string>2ab0d959-dc2b-443c-a1bb-d322d8219088</string> <!-- Replace with your provisioning profile UUID -->
+                  </dict>
+          
+                  <!-- Signing style (Manual or Automatic) -->
+                  <key>signingStyle</key>
+                  <string>manual</string>
+          
+                  <!-- The certificate to use for signing -->
+                  <key>signingCertificate</key>
+                  <string>Apple Distribution: James Oldwoods (N985XLQHFY)</string>
+          
+                  <!-- Whether to include app thinning -->
+                  <key>appThinning</key>
+                  <string>false</string>
+          
+                  <!-- Destination for exporting (app-store, ad-hoc, etc.) -->
+                  <key>destination</key>
+                  <string>export</string>
+          
+                  <!-- Options related to uploading for app store -->
+                  <key>uploadSymbols</key>
+                  <true/> <!-- If you want to upload symbol files for debugging -->
+          
+                  <!-- Enable or disable bitcode. -->
+                  <key>bitcode</key>
+                  <string>disable</string> <!-- Set to "enable" if using Bitcode -->
+          
+                  <!-- Specify if you want to include the signing entitlements -->
+                  <key>includeProvisioningProfiles</key>
+                  <true/> <!-- You generally want to include this when manually managing provisioning profiles -->
+              </dict>
+          </plist>
+          
+
+          EOF
+      
       # Step 9: Create IPA Package
       - name: Create IPA Package
         run: |
           cd build/ios/iphoneos
-          mkdir Payload
-          mv Runner.app Payload/
-          zip -r Runner-signed.ipa Payload
-          mv Runner-signed.ipa ../
+          xcodebuild -exportArchive \
+            -archivePath $PWD/Runner.xcarchive \
+            -exportPath  $GITHUB_WORKSPACE/Runner.ipa \
+            -exportOptionsPlist $GITHUB_WORKSPACE/ios/ExportOptions.plist
 
       # Step 10: Upload Signed IPA as Artifact
       - name: Upload Signed IPA
         uses: actions/upload-artifact@v3
         with:
-          name: Runner-signed.ipa
-          path: build/ios/Runner-signed.ipa
+          name: Runner.ipa
+          path: Runner-signed.ipa
