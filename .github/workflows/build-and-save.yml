@@ -53,7 +53,7 @@ jobs:
       - name: Unlock keychain
         run: |
           security unlock-keychain -p "" ~/Library/Keychains/login.keychain
-          security set-key-partition-list -S apple-tool:,apple: -s -p "" -k ~/Library/Keychains/login.keychain-db
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/login.keychain-db
 
 
       # Step 6: Set up Provisioning Profile
