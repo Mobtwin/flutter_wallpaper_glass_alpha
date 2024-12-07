@@ -49,11 +49,13 @@ jobs:
           security import AppleWWDRCAG3.cer
           security list-keychains -s ~/Library/Keychains/login.keychain-db
           security find-identity -p codesigning -v
-
+          
+      #security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/login.keychain-db
       - name: Unlock keychain
         run: |
-          security unlock-keychain -p "" ~/Library/Keychains/login.keychain
-          security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/login.keychain-db
+          security unlock-keychain -p "" ~/Library/Keychains/login.keychain-db
+          security list-keychains -s ~/Library/Keychains/login.keychain-db
+
 
 
       # Step 6: Set up Provisioning Profile
